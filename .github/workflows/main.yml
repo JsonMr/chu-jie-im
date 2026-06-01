@@ -21,7 +21,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4  # 建议同步升级到 v4
         with:
-          node-version: '16.20.2'  # 建议与你在 Windows 本地开发的版本保持一致
+          node-version: '18.20.8'  # 建议与你在 Windows 本地开发的版本保持一致
           cache: 'npm'
 
       # 3. 安装项目依赖
