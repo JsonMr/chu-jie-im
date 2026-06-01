@@ -33,6 +33,7 @@ jobs:
       # 4. 执行打包命令
       - name: Build Electron App
         run: npm run electron:build
+        working-directory: ./im-web
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
