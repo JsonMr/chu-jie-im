@@ -1,10 +1,12 @@
 name: Build and Release Electron App
 
-# 当你推送带有版本号（如 v1.0.0）的标签时，触发打包
 on:
   push:
+    branches:
+      - main        # 只要向 main 分支推送代码就触发
     tags:
-      - 'v1.0.0'
+      - 'v*.*.*'    # 推送 v 开头的标签也触发
+  workflow_dispatch: # 允许在 GitHub Actions 页面手动点击按钮触发
 
 jobs:
   build:
