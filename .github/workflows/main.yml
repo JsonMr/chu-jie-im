@@ -1,0 +1,44 @@
+name: Build and Release Electron App
+
+# 当你向 main 分支推送代码，或者推送带有 v 开头的标签（如 v1.0.0）时触发打包
+on:
+  push:
+    branches: [ main ]
+    tags:
+      - 'v*'
+
+jobs:
+  # 专门负责 macOS 打包的任务
+  build-macos:
+    runs-on: macos-latest  # 指定在最新的 macOS 虚拟环境中运行
+    
+    steps:
+      # 1. 检出你的代码
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2. 配置 Node.js 环境（建议与你在 Windows 本地开发的版本保持一致，如 16.x 或 18.x）
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+          cache: 'npm'
+
+      # 3. 安装项目依赖
+      - name: Install dependencies
+        run: npm install
+
+      # 4. 执行打包命令（必须与你在 package.json 中配置的打包脚本名称一致）
+      - name: Build Electron App
+        run: npm run electron:build
+        env:
+          # 如果配置了 GitHub 自动发布，需要提供 GH_TOKEN
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # 5. 将打包好的产物（通常在 dist_electron 或 release 目录）上传到 GitHub Actions 的临时存储
+      - name: Upload macOS artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: macOS-Build
+          path: dist_electron/*.dmg  # ⚠️请根据 electron-builder 实际输出的 .dmg 路径修改
+          if-no-files-found: warn
