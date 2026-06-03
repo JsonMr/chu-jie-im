@@ -8,7 +8,7 @@ on:
 
 jobs:
   build-macos:
-    runs-on: macos-13
+    runs-on: macos-14
     
     steps:
       - name: Checkout code
@@ -48,9 +48,9 @@ jobs:
           # 或者使用完整构建命令
           npm run electron:build-mac
         env:
-          # 强制 x64 架构
-          npm_config_arch: x64
-          npm_config_target_arch: x64
+          # ARM64 架构
+          npm_config_arch: arm64
+          npm_config_target_arch: arm64
           # 跳过原生模块重建（重要！）
           npm_config_build_from_source: false
           # 告诉 electron-builder 不要重建原生模块
