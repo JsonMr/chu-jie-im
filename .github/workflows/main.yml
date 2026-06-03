@@ -26,40 +26,37 @@ jobs:
           cd ./im-web
           # 临时备份并修改 package.json，避免 postinstall 执行
           cp package.json package.json.backup
-          # 使用 jq 或 sed 移除 postinstall 和 postuninstall 脚本
+          # 移除 postinstall 和 postuninstall 脚本
           if command -v jq &> /dev/null; then
             jq 'del(.scripts.postinstall, .scripts.postuninstall)' package.json > package.json.tmp
             mv package.json.tmp package.json
           else
-            # 如果没有 jq，使用 sed
             sed -i.bak '/"postinstall"/d' package.json
             sed -i.bak '/"postuninstall"/d' package.json
           fi
           # 安装依赖
           npm install --legacy-peer-deps --no-optional
-          # 恢复原始 package.json（保持版本控制干净）
+          # 安装缺失的 dmg-license（macOS DMG 打包必需）
+          npm install dmg-license --save-dev --no-optional
+          # 恢复原始 package.json
           mv package.json.backup package.json
         shell: bash
 
       - name: Build Electron App for macOS
         run: |
           cd ./im-web
-          # 直接调用 electron-builder，跳过 Vue 编译（如果已编译）
-          # 或者使用完整构建命令
           npm run electron:build-mac
         env:
-          # ARM64 架构
+          # ARM64 架构（Apple Silicon）
           npm_config_arch: arm64
           npm_config_target_arch: arm64
-          # 跳过原生模块重建（重要！）
           npm_config_build_from_source: false
-          # 告诉 electron-builder 不要重建原生模块
           ELECTRON_BUILDER_ALLOW_UNRESOLVED_DEPENDENCIES: true
 
       - name: Upload macOS artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: macOS-Build
+          name: macOS-Build-ARM64
           path: ./im-web/dist_electron/*.dmg
           if-no-files-found: warn
 
@@ -67,6 +64,8 @@ jobs:
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: ./im-web/dist_electron/*.dmg
+          files: |
+            ./im-web/dist_electron/*.dmg
+            ./im-web/dist_electron/*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
